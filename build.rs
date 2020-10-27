@@ -18,16 +18,14 @@ fn main() {
     let wt_inc_str: String = wt_inc.as_os_str().to_str().unwrap().to_string();
     let wt_lib_str: String = wt_lib.as_os_str().to_str().unwrap().to_string();
     let inc_arg = format!("-I{}", wt_inc_str);
-    let lib_arg = format!("-L{}", wt_lib_str);
 
     eprintln!("INC_ARG: {}\n", inc_arg);
-    eprintln!("LIB_ARG: {}\n", lib_arg);
 
     // This doesn't seem to work, we need to set the environment path before
     // calling "cargo test".
-    //env::set_var("LD_LIBRARY_PATH", "/Users/dda/wt/git/develop/build_posix/.libs");
-    //env::set_var("DYLD_LIBRARY_PATH", "/Users/dda/wt/git/develop/build_posix/.libs");
-    println!("cargo:rustc-link-search=native=/home/ubuntu/work/rust/wt-dev-rust/build_posix/.libs");
+    //env::set_var("LD_LIBRARY_PATH", wt_lib_str);
+    //env::set_var("DYLD_LIBRARY_PATH", wt_lib_str);
+    println!("cargo:rustc-link-search=native={}", wt_lib_str);
 
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
