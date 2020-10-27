@@ -92,6 +92,7 @@ impl __wt_session {
 }
 
 impl __wt_cursor {
+   /*
     pub unsafe extern "C" fn get_key(&mut self, mut args: ...) -> ::std::os::raw::c_int {
         use std::ffi::VaListImpl;
         let mut ap: VaListImpl;
@@ -100,6 +101,11 @@ impl __wt_cursor {
         aq = ap.clone();
         return (self.get_key.unwrap()) (&mut *self, aq.as_va_list());
     }
+    */
+    pub unsafe extern "C" fn get_key(&mut self, strp: *mut *mut ::std::os::raw::c_char) -> ::std::os::raw::c_int {
+        return (self.get_key.unwrap()) (&mut *self, strp);
+    }
+    /*
     pub unsafe extern "C" fn get_value(&mut self, mut args: ...) -> ::std::os::raw::c_int {
         use std::ffi::VaListImpl;
         let mut ap: VaListImpl;
@@ -108,6 +114,11 @@ impl __wt_cursor {
         aq = ap.clone();
         return (self.get_value.unwrap()) (&mut *self, aq.as_va_list());
     }
+    */
+    pub unsafe extern "C" fn get_value(&mut self, strp: *mut *mut ::std::os::raw::c_char) -> ::std::os::raw::c_int {
+        return (self.get_value.unwrap()) (&mut *self, strp);
+    }
+    /*
     pub unsafe extern "C" fn set_key(&mut self, mut args: ...) {
         use std::ffi::VaListImpl;
         let mut ap: VaListImpl;
@@ -116,6 +127,11 @@ impl __wt_cursor {
         aq = ap.clone();
         return (self.set_key.unwrap()) (&mut *self, aq.as_va_list());
     }
+    */
+    pub unsafe extern "C" fn set_key(&mut self, strp: *const ::std::os::raw::c_char) {
+        return (self.set_key.unwrap()) (&mut *self, strp);
+    }
+    /*
     pub unsafe extern "C" fn set_value(&mut self, mut args: ...) {
         use std::ffi::VaListImpl;
         let mut ap: VaListImpl;
@@ -123,6 +139,10 @@ impl __wt_cursor {
         ap = args.clone();
         aq = ap.clone();
         return (self.set_value.unwrap()) (&mut *self, aq.as_va_list());
+    }
+    */
+    pub unsafe extern "C" fn set_value(&mut self, strp: *const ::std::os::raw::c_char) {
+        return (self.set_value.unwrap()) (&mut *self, strp);
     }
     pub unsafe fn next(&mut self) -> ::std::os::raw::c_int {
         return (self.next.unwrap()) (&mut *self);
