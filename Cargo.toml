@@ -5,7 +5,7 @@ authors = ["Sulabh Mahajan<sulabh.mahajan@mongodb.com>", "Don Anderson<donald.an
 edition = "2018"
 
 [dependencies]
-iced = { path = "/Users/sulabh/work/iced", features = ["canvas", "tokio", "debug"] }
+iced = { path = "../iced", features = ["canvas", "tokio", "debug"] }
 chrono = "0.4"
 
 [build-dependencies]
