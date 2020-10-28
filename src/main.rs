@@ -174,7 +174,6 @@ impl __wt_cursor {
 
 mod ui;
 mod stats;
-pub use crate::ui::OperationPaneState;
 
 pub fn main() {
     use std::ffi::CString;
@@ -224,4 +223,8 @@ pub fn main() {
     /* Create a Stats window */
     println!("Creating a stats window..");
     stats::draw_stats();
+
+    /* Create a Commands window */
+    println!("Creating a commands window..");
+    ui::draw_commands();
 }

@@ -2,9 +2,16 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use iced::{Align, button, Button, Column, Element, Text, Sandbox};
+use iced::{
+    Align, Column, Element, pane_grid,
+    Sandbox, scrollable, Settings, Text, TextInput, text_input,
+};
 use std::fmt as fmt;
 use std::default::Default as Default;
+
+pub fn draw_commands() -> iced::Result {
+    OperationPaneState::run(Settings::default())
+}
 
 ////////////////////////////////////////////////////////////////
 // State information for UI
@@ -26,6 +33,11 @@ pub enum WtOperation {
     Drop(WtTable)
 }
 
+pub struct UIPane {
+    id: usize,
+    scroll: scrollable::State,
+}
+
 // The state of an operation.
 pub struct WtOperationState {
     operation: WtOperation,
@@ -35,8 +47,10 @@ pub struct WtOperationState {
 //#[derive(Default)]
 // The entire state of the Operations side of UI
 pub struct OperationPaneState {
+    panes: pane_grid::State<UIPane>,
     operations: Vec<WtOperation>,
-    add_button: button::State,
+    input: text_input::State,
+    input_value: String,
 }
 
 ////////////////////////////////////////////////////////////////
@@ -44,7 +58,8 @@ pub struct OperationPaneState {
 //#[derive(Debug, Clone)]
 #[derive(Debug, Clone)]
 pub enum Message {
-    AddOperation,
+    InputChanged(String),
+    InputFinished,
     Progress(WtOperation),
 }
 
@@ -82,9 +97,19 @@ impl fmt::Debug for WtOperation {
     }
 }
 
+impl UIPane {
+    fn new(id: usize) -> Self {
+        UIPane {
+            id,
+            scroll: scrollable::State::new(),
+        }
+    }
+}
+
 impl std::default::Default for OperationPaneState {
     fn default() -> Self {
-        return OperationPaneState{operations: Vec::<WtOperation>::default(), add_button: iced::button::State::default()};
+        let (panes, _) = pane_grid::State::new(UIPane::new(0));
+        return OperationPaneState{panes: panes, operations: Vec::<WtOperation>::default(), input: iced::text_input::State::default(), input_value: "".to_string()};
     }
 }
 
@@ -103,6 +128,12 @@ impl Clone for WtOperation {
 ////////////////////////////////////////////////////////////////
 // View and updating logic for UI
 
+impl OperationPaneState {
+    fn process_command(&self, _s: &String) {
+        // TODO
+    }
+}
+
 impl Sandbox for OperationPaneState {
     type Message = Message;
 
@@ -116,9 +147,13 @@ impl Sandbox for OperationPaneState {
 
     fn update(&mut self, message: Message) {
         match message {
-            Message::AddOperation => {
-                //TODO: put the operation into the operation list, and start performing the operation
-                // in another thread.
+            Message::InputChanged(s) => {
+                self.input_value = s;
+                println!("input: {}", self.input_value);
+            }
+            Message::InputFinished => {
+                println!("process command: {}", self.input_value);
+                self.process_command(&self.input_value);
             }
             // called to update progress
             Message::Progress(_op) => {
@@ -129,23 +164,23 @@ impl Sandbox for OperationPaneState {
 
     fn view(&mut self) -> Element<Message> {
         // We use a column: a simple vertical layout
-
         // List of operations that have been issued.
         // TODO: where to put the progress meter?
-        let operations_text : &str = "first line\nsecond line"; //TODO: self.operations.join("\n");
+        let operations_text : &str = "first line\nsecond line";
+        let input = TextInput::new(
+            &mut self.input,
+            "insert 1000 test-a",
+            &self.input_value,
+            Message::InputChanged)
+            .on_submit(Message::InputFinished);
         Column::new()
             .padding(20)
             .align_items(Align::Start)
             .push(
                 // We show the current operations here
-                Text::new(&operations_text.to_string()).size(50),
+                Text::new(&operations_text.to_string()),
             )
-            .push(
-                // The decrement button. We tell it to produce a
-                // `DecrementPressed` message when pressed
-                Button::new(&mut self.add_button, Text::new("Add"))
-                    //TODO: .on_press(Message::AddOperation),
-            )
+            .push(input)
             .into()
     }    
 }
