@@ -7,6 +7,8 @@ edition = "2018"
 [dependencies]
 iced = { path = "../iced", features = ["canvas", "tokio", "debug"] }
 chrono = "0.4"
+rand = "0.7.3"
+circular-queue = "0.2.6"
 
 [build-dependencies]
 bindgen = "0.55.1"
