@@ -1,7 +1,10 @@
 [package]
-name = "hello_world" # the name of the package
+name = "rust_wt" # the name of the package
 version = "0.1.0"    # the current version, obeying semver
-authors = ["Alice <a@example.com>", "Bob <b@example.com>"]
+authors = ["Sulabh Mahajan<sulabh.mahajan@mongodb.com>", "Don Anderson<donald.anderson@mongodb.com>"]
+edition = "2018"
+[dependencies.iced]
+version = "0.1.1"
 
 [build-dependencies]
 bindgen = "0.55.1"

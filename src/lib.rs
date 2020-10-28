@@ -174,6 +174,9 @@ impl __wt_cursor {
     }
 }
 
+mod ui;
+pub use crate::ui::UIState;
+
 mod tests {
     #[test]
     fn wt_open() {
