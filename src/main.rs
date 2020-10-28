@@ -1,11 +1,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
-#![feature(c_variadic)]
+//#![feature(c_variadic)]
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
-
-#[cfg(test)]
 
 // Without this directive, we get warnings, even though we are using the macros.
 #[allow(unused_macros)]
@@ -175,49 +173,55 @@ impl __wt_cursor {
 }
 
 mod ui;
+mod stats;
 pub use crate::ui::OperationPaneState;
 
-mod tests {
-    #[test]
-    fn wt_open() {
-        use super::*;
-        use std::ffi::CString;
+pub fn main() {
+    use std::ffi::CString;
 
-        const WT_HOME: &str = "./WT_TEST";
-        setup_home(WT_HOME);
+    const WT_HOME: &str = "./WT_TEST";
+    setup_home(WT_HOME);
 
-        unsafe {
-            let mut conn_ret : *mut WT_CONNECTION = WTNULL!();
-            let mut session_ret : *mut WT_SESSION = WTNULL!();
-            let mut cursor_ret : *mut WT_CURSOR = WTNULL!();
+    unsafe {
+        let mut conn_ret : *mut WT_CONNECTION = WTNULL!();
+        let mut session_ret : *mut WT_SESSION = WTNULL!();
+        let mut cursor_ret : *mut WT_CURSOR = WTNULL!();
 
-            let home_c_str = WTSTRING!(WT_HOME);
-            let config = WTSTRING!("create");
-            let uri = WTSTRING!("table:store");
-            let uri2 = WTSTRING!("table:store2");
+        let home_c_str = WTSTRING!(WT_HOME);
+        let config = WTSTRING!("create");
+        let uri = WTSTRING!("table:store");
+        let uri2 = WTSTRING!("table:store2");
 
-            wiredtiger_open(home_c_str.as_ptr(), WTNULL!(), config.as_ptr(), &mut conn_ret);
-            let conn = WTPTR!(conn_ret);
+        println!("Opening wiredtiger connection..");
+        wiredtiger_open(home_c_str.as_ptr(), WTNULL!(), config.as_ptr(), &mut conn_ret);
+        let conn = WTPTR!(conn_ret);
 
-            conn.open_session(WTNULL!(), WTNULL!(), &mut session_ret);
-            let session = WTPTR!(session_ret);
-            let create_config = WTSTRING!("key_format=S,value_format=S");
-            session.create(uri.as_ptr(), create_config.as_ptr());
-            session.create(uri2.as_ptr(), create_config.as_ptr());
+        println!("Opening a session and creating tables..");
+        conn.open_session(WTNULL!(), WTNULL!(), &mut session_ret);
+        let session = WTPTR!(session_ret);
+        let create_config = WTSTRING!("key_format=S,value_format=S");
+        session.create(uri.as_ptr(), create_config.as_ptr());
+        session.create(uri2.as_ptr(), create_config.as_ptr());
 
-            session.open_cursor(uri.as_ptr(), WTNULL!(), WTNULL!(), &mut cursor_ret);
-            let cursor = WTPTR!(cursor_ret);
+        session.open_cursor(uri.as_ptr(), WTNULL!(), WTNULL!(), &mut cursor_ret);
+        let cursor = WTPTR!(cursor_ret);
 
-            for i in 0..100 {
-                let key = WTSTRING!(format!("KEY{}", i));
-                let value = WTSTRING!(format!("VALUE{}", i));
-                cursor.set_key(key.as_ptr());
-                cursor.set_value(value.as_ptr());
-                cursor.insert();
-            }
-            cursor.close();
-            session.close(WTNULL!());
-            conn.close(WTNULL!());
+        println!("Inserting K/V pair..");
+        for i in 0..100 {
+            let key = WTSTRING!(format!("KEY{}", i));
+            let value = WTSTRING!(format!("VALUE{}", i));
+            cursor.set_key(key.as_ptr());
+            cursor.set_value(value.as_ptr());
+            cursor.insert();
         }
+
+        println!("Closing cursor, session and connection..");
+        cursor.close();
+        session.close(WTNULL!());
+        conn.close(WTNULL!());
     }
+
+    /* Create a Stats window */
+    println!("Creating a stats window..");
+    stats::draw_stats();
 }

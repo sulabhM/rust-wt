@@ -3,9 +3,15 @@ name = "rust_wt" # the name of the package
 version = "0.1.0"    # the current version, obeying semver
 authors = ["Sulabh Mahajan<sulabh.mahajan@mongodb.com>", "Don Anderson<donald.anderson@mongodb.com>"]
 edition = "2018"
-[dependencies.iced]
-version = "0.1.1"
+
+[dependencies]
+iced = { path = "/Users/sulabh/work/iced", features = ["canvas", "tokio", "debug"] }
+chrono = "0.4"
 
 [build-dependencies]
 bindgen = "0.55.1"
+
+[[bin]]
+name = "rust_wt"
+path = "src/main.rs"
 
