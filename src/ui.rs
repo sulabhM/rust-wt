@@ -6,10 +6,15 @@ use iced::{Align, button, Button, Column, Element, Text, Sandbox};
 use std::fmt as fmt;
 use std::default::Default as Default;
 
+////////////////////////////////////////////////////////////////
 // State information for UI
+#[derive(Clone)]
+
+// A WiredTiger table, and its current state.
+// This object must be shared.
 pub struct WtTable {
     name: String,
-    total_entries: u32,
+    total_entries: u32,     // number of entries already inserted into the table.
 }
 
 // A single line of operation, representing, say "insert 100 foo"
@@ -21,17 +26,20 @@ pub enum WtOperation {
     Drop(WtTable)
 }
 
+// The state of an operation.
 pub struct WtOperationState {
     operation: WtOperation,
-    completed: u32,
+    completed: u32,      // number of items completed (inserted/updated/deleted).  Drop only has one item.
 }
 
 //#[derive(Default)]
-pub struct UIState {
+// The entire state of the Operations side of UI
+pub struct OperationPaneState {
     operations: Vec<WtOperation>,
     add_button: button::State,
 }
 
+////////////////////////////////////////////////////////////////
 // Message passed for UI
 //#[derive(Debug, Clone)]
 #[derive(Debug, Clone)]
@@ -74,30 +82,28 @@ impl fmt::Debug for WtOperation {
     }
 }
 
-impl std::default::Default for UIState {
-    //fn default() -> Self { UIState(operations: vec!([]), add_button: <iced::button::State as Trait>::default()) }
+impl std::default::Default for OperationPaneState {
     fn default() -> Self {
-        let ops_default = vec!([]);
-        //return UIState(ops_default, <iced::button::State as Trait>::Released)
-        //return UIState(ops_default, Released)
-        return (ops_default, iced::button::State::Released);
+        return OperationPaneState{operations: Vec::<WtOperation>::default(), add_button: iced::button::State::default()};
     }
 }
 
 impl Clone for WtOperation {
+    // TODO: we don't really want to clone the table, it should be shared.
     fn clone(&self) -> Self {
         match self {
-            WtOperation::Insert(count, table) => WtOperation::Insert(*count, *table),
-            WtOperation::Update(count, table) => WtOperation::Update(*count, *table),
-            WtOperation::Delete(count, table) => WtOperation::Delete(*count, *table),
-            WtOperation::Drop(table) => WtOperation::Drop(*table),
+            WtOperation::Insert(count, table) => WtOperation::Insert(*count, table.clone()),
+            WtOperation::Update(count, table) => WtOperation::Update(*count, table.clone()),
+            WtOperation::Delete(count, table) => WtOperation::Delete(*count, table.clone()),
+            WtOperation::Drop(table) => WtOperation::Drop(table.clone()),
         }
     }
 }
 
-// View logic for UI
+////////////////////////////////////////////////////////////////
+// View and updating logic for UI
 
-impl Sandbox for UIState {
+impl Sandbox for OperationPaneState {
     type Message = Message;
 
     fn new() -> Self {
@@ -111,10 +117,12 @@ impl Sandbox for UIState {
     fn update(&mut self, message: Message) {
         match message {
             Message::AddOperation => {
-                //TODO: self.value += 1;
+                //TODO: put the operation into the operation list, and start performing the operation
+                // in another thread.
             }
-            Message::Progress(op) => {
-                //TODO: self.value -= 1;
+            // called to update progress
+            Message::Progress(_op) => {
+                //TODO: update the progress
             }
         }
     }
@@ -124,7 +132,7 @@ impl Sandbox for UIState {
 
         // List of operations that have been issued.
         // TODO: where to put the progress meter?
-        let mut operations_text : &str = "first line\nsecond line"; //TODO: self.operations.join("\n");
+        let operations_text : &str = "first line\nsecond line"; //TODO: self.operations.join("\n");
         Column::new()
             .padding(20)
             .align_items(Align::Start)
