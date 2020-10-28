@@ -172,7 +172,7 @@ impl __wt_cursor {
     }
 }
 
-mod ui;
+mod command;
 mod stats;
 
 pub fn main() {
@@ -226,5 +226,5 @@ pub fn main() {
 
     /* Create a Commands window */
     println!("Creating a commands window..");
-    ui::draw_commands();
+    command::draw_commands();
 }
